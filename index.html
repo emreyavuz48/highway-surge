@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Highway Surge - Endless Racing Game | Free Online</title>
+    <meta name="description"
+        content="Race through endless traffic in this thrilling arcade racing game. Dodge cars, rack up points, and set high scores! Play free online now.">
+    <meta name="keywords" content="highway surge, racing game, car game, endless racer, arcade game, free game">
+    <meta name="author" content="Highway Surge">
+    <meta property="og:title" content="Highway Surge - Endless Racing">
+    <meta property="og:description" content="Race through endless traffic! Dodge cars and set high scores!">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Highway Surge - Endless Racing">
+    <meta name="twitter:description" content="Race through endless traffic! Dodge cars and set high scores!">
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+
+<body>
+    <div id="game-container">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <h1 class="loading-title">HIGHWAY<span class="accent">SURGE</span></h1>
+                <div class="loading-car">🏎️</div>
+                <div class="loading-bar-container">
+                    <div id="loading-bar" class="loading-bar"></div>
+                </div>
+                <p class="loading-text">Loading...</p>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD Overlay -->
+        <div id="hud">
+            <div class="hud-item score-panel">
+                <span class="hud-label">SCORE</span>
+                <span id="score" class="hud-value">0</span>
+            </div>
+            <div class="hud-item coin-panel">
+                <span class="hud-label">COINS</span>
+                <span id="coins" class="hud-value">💰 0</span>
+            </div>
+            <div class="hud-item speed-panel">
+                <span class="hud-label">SPEED</span>
+                <span id="speed" class="hud-value">0 <small>KM/H</small></span>
+            </div>
+            <div class="hud-item highscore-panel">
+                <span class="hud-label">HIGH SCORE</span>
+                <span id="highscore" class="hud-value">0</span>
+            </div>
+        </div>
+
+        <!-- Bonus Popups -->
+        <div id="bonus-popup" class="bonus-popup hidden">+50</div>
+        <div id="coin-popup" class="coin-popup hidden">+10 💰</div>
+
+        <!-- Combo Counter -->
+        <div id="combo-counter" class="combo-counter hidden">x2</div>
+
+        <!-- Power-up Indicators -->
+        <div id="powerup-indicators" class="powerup-indicators"></div>
+
+        <!-- Daily Rewards Modal -->
+        <div id="daily-reward-modal" class="modal hidden">
+            <div class="modal-content daily-reward-content">
+                <h2>🎁 DAILY REWARD</h2>
+                <div class="daily-reward-day">Day <span id="reward-day">1</span></div>
+                <div class="daily-reward-amount">
+                    <span id="reward-coins">100</span> 💰
+                </div>
+                <div id="reward-bonus" class="reward-bonus hidden">
+                    + BONUS CAR UNLOCK!
+                </div>
+                <button id="claim-reward-btn" class="btn-primary">
+                    <span class="btn-text">CLAIM</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="game-screen">
+            <div class="screen-content">
+                <h1 class="game-title">HIGHWAY<span class="accent">SURGE</span></h1>
+                <p class="game-subtitle">Endless Racing Adventure</p>
+                <div class="start-instructions">
+                    <div class="instruction-row">
+                        <span class="key">← →</span> or <span class="key">A D</span> Move
+                    </div>
+                    <div class="instruction-row">
+                        <span class="key">↑ ↓</span> or <span class="key">W S</span> Speed
+                    </div>
+                </div>
+                <div class="menu-buttons">
+                    <button id="start-btn" class="btn-primary">
+                        <span class="btn-text">START RACING</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                    <!-- Buy Coins button removed -->
+                    <button id="lucky-wheel-btn" class="btn-secondary">
+                        <span class="btn-text">🎰 LUCKY WHEEL</span>
+                    </button>
+                    <button id="garage-btn" class="btn-secondary">
+                        <span class="btn-text">🚗 GARAGE</span>
+                    </button>
+                    <button id="stats-btn" class="btn-secondary">
+                        <span class="btn-text">🏅 MY STATS</span>
+                    </button>
+                    <button id="settings-btn" class="btn-secondary">
+                        <span class="btn-text">⚙️ SETTINGS</span>
+                    </button>
+                </div>
+                <div class="coin-display">
+                    <span id="menu-coins">💰 0 COINS</span>
+                </div>
+            </div>
+            <div class="road-decoration"></div>
+        </div>
+
+        <!-- Garage Screen -->
+        <div id="garage-screen" class="game-screen hidden">
+            <div class="screen-content garage-content">
+                <h2 class="garage-title">🚗 GARAGE</h2>
+                <div class="garage-coins">
+                    <span id="garage-coins">💰 0</span>
+                    <!-- Buy coins button removed -->
+                </div>
+                <div id="car-grid" class="car-grid">
+                    <!-- Cars will be populated by JavaScript -->
+                </div>
+                <button id="garage-back-btn" class="btn-back">← BACK</button>
+            </div>
+        </div>
+
+        <!-- Stats Screen -->
+        <div id="stats-screen" class="game-screen hidden">
+            <div class="screen-content stats-content">
+                <h2 class="stats-title">🏅 MY STATS</h2>
+                <div class="stats-grid">
+                    <div class="stat-card best-score">
+                        <div class="stat-card-icon">🏆</div>
+                        <div class="stat-card-value" id="stat-best-score">0</div>
+                        <div class="stat-card-label">Best Score</div>
+                    </div>
+                    <div class="stat-card total-distance">
+                        <div class="stat-card-icon">🛣️</div>
+                        <div class="stat-card-value" id="stat-total-distance">0 m</div>
+                        <div class="stat-card-label">Distance Traveled</div>
+                    </div>
+                    <div class="stat-card total-overtakes">
+                        <div class="stat-card-icon">💨</div>
+                        <div class="stat-card-value" id="stat-total-overtakes">0</div>
+                        <div class="stat-card-label">Cars Overtaken</div>
+                    </div>
+                    <div class="stat-card total-coins">
+                        <div class="stat-card-icon">💰</div>
+                        <div class="stat-card-value" id="stat-total-coins">0</div>
+                        <div class="stat-card-label">Coins Earned</div>
+                    </div>
+                    <div class="stat-card total-fever">
+                        <div class="stat-card-icon">🔥</div>
+                        <div class="stat-card-value" id="stat-total-fever">0</div>
+                        <div class="stat-card-label">Fever Activations</div>
+                    </div>
+                    <div class="stat-card cars-owned">
+                        <div class="stat-card-icon">🚗</div>
+                        <div class="stat-card-value" id="stat-cars-owned">1 / 12</div>
+                        <div class="stat-card-label">Cars Owned</div>
+                    </div>
+                    <div class="stat-card achievements">
+                        <div class="stat-card-icon">⭐</div>
+                        <div class="stat-card-value" id="stat-achievements">0 / 10</div>
+                        <div class="stat-card-label">Achievements</div>
+                    </div>
+                    <div class="stat-card games-played">
+                        <div class="stat-card-icon">🎮</div>
+                        <div class="stat-card-value" id="stat-games-played">0</div>
+                        <div class="stat-card-label">Games Played</div>
+                    </div>
+                </div>
+                <button id="stats-back-btn" class="btn-back">← BACK</button>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="game-screen hidden">
+            <div class="screen-content settings-content">
+                <h2 class="settings-title">⚙️ SETTINGS</h2>
+                <div class="settings-section">
+                    <h3 class="settings-label">DIFFICULTY</h3>
+                    <div class="difficulty-options">
+                        <button class="difficulty-btn" data-difficulty="easy">
+                            <span class="diff-name">EASY</span>
+                            <span class="diff-desc">Less traffic, slower pace</span>
+                        </button>
+                        <button class="difficulty-btn active" data-difficulty="medium">
+                            <span class="diff-name">MEDIUM</span>
+                            <span class="diff-desc">Balanced gameplay</span>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="hard">
+                            <span class="diff-name">HARD</span>
+                            <span class="diff-desc">Dense traffic, 1.5x score</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-label">AUDIO</h3>
+                    <div class="slider-container">
+                        <label>Music Volume</label>
+                        <input type="range" id="music-volume" min="0" max="100" value="30">
+                    </div>
+                    <div class="slider-container">
+                        <label>SFX Volume</label>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="50">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-label">CONTROLS</h3>
+                    <div class="control-type-selector">
+                        <label>Input Method</label>
+                        <div class="toggle-switch-container">
+                            <button id="ctrl-buttons-btn" class="ctrl-btn active">BUTTONS</button>
+                            <button id="ctrl-swipe-btn" class="ctrl-btn">SWIPE</button>
+                        </div>
+                    </div>
+                    <div class="slider-container">
+                        <label>Steering Sensitivity</label>
+                        <input type="range" id="sensitivity" min="1" max="10" value="5">
+                        <div class="range-labels">
+                            <span>Slow</span>
+                            <span>Fast</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="settings-back-btn" class="btn-back">← BACK</button>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameover-screen" class="game-screen hidden">
+            <div class="screen-content">
+                <h2 class="gameover-title">GAME OVER</h2>
+                <div class="final-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">SCORE</span>
+                        <span id="final-score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">COINS EARNED</span>
+                        <span id="coins-earned" class="stat-value">💰 0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">HIGH SCORE</span>
+                        <span id="final-highscore" class="stat-value">0</span>
+                    </div>
+                    <div id="new-record" class="new-record hidden">🏆 NEW RECORD!</div>
+                </div>
+
+                <!-- Social Share Buttons -->
+                <div class="share-section">
+                    <p class="share-label">Share your score!</p>
+                    <div class="share-buttons">
+                        <button id="share-twitter" class="share-btn twitter" title="Share on Twitter">
+                            <span>𝕏</span>
+                        </button>
+                        <button id="share-facebook" class="share-btn facebook" title="Share on Facebook">
+                            <span>f</span>
+                        </button>
+                        <button id="share-whatsapp" class="share-btn whatsapp" title="Share on WhatsApp">
+                            <span>📱</span>
+                        </button>
+                        <button id="share-copy" class="share-btn copy" title="Copy Link">
+                            <span>📋</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Removed ad section - users can purchase coins via menu -->
+
+                <div class="gameover-actions">
+                    <button id="restart-btn" class="btn-primary">
+                        <span class="btn-text">RACE AGAIN</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                    <button id="menu-btn" class="btn-secondary">
+                        <span class="btn-text">MAIN MENU</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Countdown Overlay -->
+        <div id="countdown-overlay" class="countdown-overlay hidden">
+            <div id="countdown-number" class="countdown-number">3</div>
+        </div>
+
+        <!-- Pause Button -->
+        <button id="pause-btn" class="pause-btn hidden">⏸️</button>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="game-screen hidden">
+            <div class="screen-content">
+                <h2 class="pause-title">⏸️ PAUSED</h2>
+                <div class="pause-buttons">
+                    <button id="resume-btn" class="btn-primary">
+                        <span class="btn-text">▶️ RESUME</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                    <button id="pause-menu-btn" class="btn-secondary">
+                        <span class="btn-text">🏠 MAIN MENU</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revive Screen -->
+        <div id="revive-screen" class="game-screen hidden">
+            <div class="screen-content">
+                <h2 class="revive-title">💀 CRASHED!</h2>
+
+                <!-- Current Run Stats -->
+                <div class="crash-stats">
+                    <div class="crash-stat-row">
+                        <div class="crash-stat">
+                            <span class="crash-label">SCORE</span>
+                            <span id="crash-score" class="crash-value">0</span>
+                        </div>
+                        <div class="crash-stat">
+                            <span class="crash-label">SPEED</span>
+                            <span id="crash-speed" class="crash-value">0 km/h</span>
+                        </div>
+                    </div>
+                    <div class="crash-stat-row">
+                        <div class="crash-stat">
+                            <span class="crash-label">COINS</span>
+                            <span id="crash-coins-earned" class="crash-value gold">+0</span>
+                        </div>
+                        <div class="crash-stat">
+                            <span class="crash-label">HIGH SCORE</span>
+                            <span id="crash-highscore" class="crash-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="revive-subtitle">Continue from here?</p>
+
+                <div class="revive-options">
+                    <button id="revive-coins-btn" class="btn-revive coins">
+                        <span class="revive-icon">💰</span>
+                        <span class="revive-text">Pay <span id="revive-cost">100</span> Coins</span>
+                    </button>
+                    <button id="revive-skip-btn" class="btn-skip">
+                        <span class="btn-text">✖️ Skip & Restart</span>
+                    </button>
+                    <button id="revive-menu-btn" class="btn-menu">
+                        <span class="btn-text">🏠 Main Menu</span>
+                    </button>
+                </div>
+                <div class="revive-info">
+                    <span>Your coins: </span><span id="revive-coins">💰 0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Touch Controls (Mobile Buttons) - FIXED POSITIONING -->
+        <div id="touch-controls"
+            style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; display: none;">
+            <!-- LEFT GROUP: Steering buttons - Bottom Left Corner -->
+            <div id="left-control-group"
+                style="position: fixed; bottom: 25px; left: 25px; display: flex; flex-direction: row; gap: 15px; pointer-events: auto;">
+                <button id="touch-left"
+                    style="width: 70px; height: 70px; border-radius: 50%; font-size: 28px; background: rgba(50,50,50,0.8); color: #5dade2; border: 3px solid rgba(52,152,219,0.6); display: flex; align-items: center; justify-content: center; touch-action: none; -webkit-tap-highlight-color: transparent;">◀</button>
+                <button id="touch-right"
+                    style="width: 70px; height: 70px; border-radius: 50%; font-size: 28px; background: rgba(50,50,50,0.8); color: #5dade2; border: 3px solid rgba(52,152,219,0.6); display: flex; align-items: center; justify-content: center; touch-action: none; -webkit-tap-highlight-color: transparent;">▶</button>
+            </div>
+            <!-- RIGHT GROUP: Gas/Brake buttons - Bottom Right Corner -->
+            <div id="right-control-group"
+                style="position: fixed; bottom: 25px; right: 25px; display: flex; flex-direction: row; gap: 15px; pointer-events: auto;">
+                <button id="touch-up"
+                    style="width: 70px; height: 70px; border-radius: 50%; font-size: 28px; background: rgba(39,174,96,0.8); color: white; border: 3px solid rgba(46,204,113,0.8); display: flex; align-items: center; justify-content: center; touch-action: none; -webkit-tap-highlight-color: transparent;">▲</button>
+                <button id="touch-down"
+                    style="width: 70px; height: 70px; border-radius: 50%; font-size: 28px; background: rgba(192,57,43,0.8); color: white; border: 3px solid rgba(231,76,60,0.8); display: flex; align-items: center; justify-content: center; touch-action: none; -webkit-tap-highlight-color: transparent;">▼</button>
+            </div>
+        </div>
+
+        <!-- Mute Button (during gameplay) -->
+        <button id="mute-btn" class="mute-btn hidden">🔊</button>
+
+        <!-- Tutorial Overlay (first-time players) -->
+        <div id="tutorial-overlay" class="tutorial-overlay hidden">
+            <div class="tutorial-content">
+                <h2 class="tutorial-title">HOW TO PLAY</h2>
+                <div class="tutorial-controls">
+                    <div class="tutorial-control-group">
+                        <div class="tutorial-icon">⌨️</div>
+                        <div class="tutorial-keys">
+                            <span class="key">WASD</span> or <span class="key">ARROWS</span>
+                        </div>
+                        <p>Steer, Gas & Brake</p>
+                    </div>
+                    <div class="tutorial-control-group">
+                        <div class="tutorial-icon">📱</div>
+                        <div class="tutorial-touch">
+                            <div class="tutorial-keys-row">
+                                <span class="key">◀</span> <span class="key">▶</span>
+                            </div>
+                            <div class="tutorial-keys-row">
+                                <span class="key">▲</span> <span class="key">▼</span>
+                            </div>
+                        </div>
+                        <p>Steer & Speed</p>
+                    </div>
+                </div>
+                <div class="tutorial-tips">
+                    <p>🏆 Overtake cars for bonus points</p>
+                    <p>💰 Collect coins to unlock cars</p>
+                    <p>⚡ Chain overtakes for FEVER mode!</p>
+                </div>
+                <button id="tutorial-dismiss-btn" class="btn-primary">
+                    <span class="btn-text">GOT IT!</span>
+                    <span class="btn-glow"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lucky Wheel Modal -->
+        <div id="lucky-wheel-modal" class="modal hidden">
+            <div class="modal-content lucky-wheel-content">
+                <h2>🎰 LUCKY WHEEL</h2>
+                <div class="wheel-container">
+                    <canvas id="lucky-wheel-canvas" width="280" height="280"></canvas>
+                    <div class="wheel-pointer">▼</div>
+                </div>
+                <div id="wheel-result" class="wheel-result hidden"></div>
+                <div class="wheel-buttons">
+                    <button id="spin-wheel-btn" class="btn-primary">
+                        <span class="btn-text">🎲 SPIN!</span>
+                        <span class="btn-glow"></span>
+                    </button>
+                </div>
+                <button id="wheel-close-btn" class="btn-back">← BACK</button>
+            </div>
+        </div>
+
+        <!-- Modals removed -->
+    </div>
+    <script src="game.js"></script>
+</body>
+
+</html>
